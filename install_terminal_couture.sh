@@ -15,12 +15,12 @@ fi
 eval "$($(brew --prefix)/bin/brew shellenv)"
 
 # Run brew doctor (non-blocking)
-echo "🩺 Running brew doctor..."
+echo "�� Running brew doctor..."
 brew doctor || true
 
 # Install essential CLI tools and font
 echo "📦 Installing tools and fonts..."
-brew install git neofetch htop tree fzf
+brew install git fastfetch htop tree fzf
 brew install --cask font-meslo-lg-nerd-font
 
 # Install Oh My Zsh
@@ -51,6 +51,11 @@ source \$ZSH/oh-my-zsh.sh
 alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
 alias update="brew update && brew upgrade && brew cleanup"
 [[ -f \$HOME/.p10k.zsh ]] && source \$HOME/.p10k.zsh
+
+# Show system info at launch
+if command -v fastfetch &>/dev/null; then
+  fastfetch
+fi
 EOF
 
 # Download preset Powerlevel10k config

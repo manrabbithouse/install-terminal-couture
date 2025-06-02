@@ -2,32 +2,47 @@
 set -e
 
 echo "Backing up and prepping Terminal couture..."
-mv -v ~/.zshrc ~/.zshrc.backup.$(date +%s) 2>/dev/null || true
-rm -rf ~/.oh-my-zsh ~/.p10k.zsh
+mv -v "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%s)" 2>/dev/null || true
+rm -rf "$HOME/.oh-my-zsh" "$HOME/.p10k.zsh"
 
-# Install Homebrew
+# Install Homebrew if not found
 if ! command -v brew &>/dev/null; then
+  echo "🍺 Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Add brew to shell environment (Intel Mac safe)
+eval "$($(brew --prefix)/bin/brew shellenv)"
 
+# Run brew doctor (non-blocking)
+echo "🩺 Running brew doctor..."
+brew doctor || true
+
+# Install essential CLI tools and font
+echo "📦 Installing tools and fonts..."
 brew install git neofetch htop tree fzf
-brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 
+# Install Oh My Zsh
+echo "💅 Installing Oh My Zsh..."
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
+# Install Powerlevel10k
+echo "✨ Installing Powerlevel10k..."
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
-  ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+  "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 
+# Install Zsh plugins
+echo "🔌 Installing Zsh plugins..."
 git clone https://github.com/zsh-users/zsh-autosuggestions \
-  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+  "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
 
 git clone https://github.com/zsh-users/zsh-syntax-highlighting \
-  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+  "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
 
-cat > ~/.zshrc <<EOF
+# Create new .zshrc
+echo "📝 Writing .zshrc..."
+cat > "$HOME/.zshrc" <<EOF
 export ZSH="\$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
@@ -35,12 +50,17 @@ source \$ZSH/oh-my-zsh.sh
 
 alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
 alias update="brew update && brew upgrade && brew cleanup"
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+[[ -f \$HOME/.p10k.zsh ]] && source \$HOME/.p10k.zsh
 EOF
 
-curl -fsSL https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/config/p10k-classic.zsh -o ~/.p10k.zsh
+# Download preset Powerlevel10k config
+echo "🎨 Downloading Powerlevel10k theme preset..."
+curl -fsSL https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/config/p10k-classic.zsh -o "$HOME/.p10k.zsh"
 
+# Final message
 clear
-echo "🎉 Terminal Couture installed! Set your font to MesloLGS NF and run: p10k configure"
+echo -e "\n🎉 Terminal Couture installed!\n"
+echo "👉 Open Terminal > Settings > Profiles > Text and set your font to 'MesloLGS NF'"
+echo "👉 Then run: p10k configure"
 exec zsh
 
